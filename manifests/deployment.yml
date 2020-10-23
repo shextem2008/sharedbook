@@ -1,0 +1,19 @@
+apiVersion : apps/v1
+kind: Deployment
+metadata:
+  name: sharedbook 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sharedbook
+  template:
+    metadata:
+      labels:
+        app: sharedbook 
+    spec:
+      containers:
+        - name: sharedbook 
+          image: netproregs.azurecr.io/sharedbook
+          ports:
+          - containerPort: 8080
