@@ -1,6 +1,6 @@
 using System;
 
-namespace SharedBook
+namespace SHB.WebApi
 {
     public class WeatherForecast
     {
