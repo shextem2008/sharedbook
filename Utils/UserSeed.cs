@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
 using SHB.Core.Domain.Entities;
+using SHB.Core.Entities;
 //using SHB.WebApi.Utils;
 
 namespace SHB.WebAPI.Utils

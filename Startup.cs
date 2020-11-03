@@ -34,6 +34,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using SHB.Core.Entities;
+using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
 
 namespace SHB.WebApi
 {
@@ -48,17 +51,13 @@ namespace SHB.WebApi
             Environment = environment;
         }
 
-        //public IConfiguration Configuration { get; }
-
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             #region Identity
 
             services.AddDbContext<ApplicationDbContext>(options =>
-             options.UseSqlServer(Configuration.GetConnectionString(WebConstants.ConnectionStringName)).EnableSensitiveDataLogging()
-             , ServiceLifetime.Transient);
-
+                options.UseSqlServer(Configuration.GetConnectionString(WebConstants.ConnectionStringName))
+                , ServiceLifetime.Transient);
 
             services.AddIdentity<User, Role>(options =>
             {
@@ -67,7 +66,7 @@ namespace SHB.WebApi
                 options.Password.RequireUppercase = false;
                 options.Password.RequireLowercase = false;
                 options.Lockout.AllowedForNewUsers = false;
-                //options.SignIn.RequireConfirmedEmail = true;
+                options.SignIn.RequireConfirmedEmail = true;
                 options.User.RequireUniqueEmail = true;
             })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -75,12 +74,11 @@ namespace SHB.WebApi
             #endregion
 
             #region Services
-
-            services.AddTransient<DbContext>((_) => {
+            services.AddTransient<DbContext>((_) =>
+            {
                 var connStr = Configuration.GetConnectionString(WebConstants.ConnectionStringName);
                 return new ApplicationDbContext(new DbContextOptionsBuilder<ApplicationDbContext>()
-                                         .UseSqlServer(connStr,
-                     b => b.MigrationsAssembly(typeof(ApplicationDbContext).FullName))
+                                         .UseSqlServer(connStr)
                                          .Options);
             });
 
@@ -89,23 +87,61 @@ namespace SHB.WebApi
             services.RegisterGenericRepos(typeof(ApplicationDbContext));
 
             services.AddScoped<IErrorCodeService, ErrorCodeService>();
-            services.AddScoped<IEmployeeService, EmployeeService>();
             services.AddScoped<IWalletService, WalletService>();
             services.AddScoped<IWalletNumberService, WalletNumberService>();
             services.AddScoped<ICouponService, CouponService>();
+            //services.AddScoped<ICustomerService, CustomerService>();
             services.AddScoped<IReferralService, ReferralService>();
+            //services.AddScoped<IRouteService, RouteService>();
             services.AddScoped<IRegionService, RegionService>();
             services.AddScoped<IStateService, StateService>();
             services.AddScoped<ITerminalService, TerminalService>();
+            services.AddScoped<IEmployeeService, EmployeeService>();
+
+
+            //services.AddScoped<IVehicleModelService, VehicleModelService>();
+            //services.AddScoped<IVehicleMakeService, VehicleMakeService>();
+            //services.AddScoped<IBookingService, BookingService>();
+            //services.AddScoped<IManifestService, ManifestService>();
+            //services.AddScoped<ISeatManagementService, SeatManagementService>();
+            //services.AddScoped<ITripService, TripService>();
+            //services.AddScoped<IDiscountService, DiscountService>();
+            //services.AddScoped<IDriverService, DriverService>();
             services.AddScoped<ICouponService, CouponService>();
+            //services.AddScoped<IMtuReports, MtuReportService>();
+            //services.AddScoped<ITripAvailabilityService, TripAvailabilityService>();
+            //services.AddScoped<IPickupPointService, PickupPointService>();
+            //services.AddScoped<IAccountTransactionService, AccountTransactionService>();
+            //services.AddScoped<IFareService, FareService>();
+            //services.AddScoped<IFareCalendarService, FareCalendarService>();
+            //services.AddScoped<IVehicleService, VehicleService>();
+            //services.AddScoped<IVehicleTripRegistrationService, VehicleTripRegistrationService>();
+            //services.AddScoped<IAccountSummaryService, AccountSummaryService>();
+            //services.AddScoped<IHireRequestService, HireRequestService>();
+            //services.AddScoped<IBookingReportService, BookingReportService>();
+            //services.AddScoped<IFeedbackService, FeedbackService>();
+            //services.AddScoped<ISubRouteService, SubRouteService>();
+            //services.AddScoped<IJourneyManagementService, JourneyManagementService>();
+            //services.AddScoped<IManifestService, ManifestService>();
+            //services.AddScoped<IFranchizeService, FranchizeService>();
+            //services.AddScoped<IPassportTypeService, PassportTypeService>();
+            //services.AddScoped<IHireBusService, HireBusService>();
+            //services.AddScoped<IHirePassengerService, HirePassengerService>();
+            //services.AddScoped<IAgentLoctionService, AgentLocationService>();
+            //services.AddScoped<IAgentCommissionService, AgentCommissionService>();
+            //services.AddScoped<IAgentsService, AgentsService>();
+            //services.AddScoped<IWorkshopService, WorkshopService>();
+            //services.AddScoped<IGeneralTransactionService, GeneralTransactionService>();
             services.AddScoped<ICompanyInfo, CompanyInfoService>();
-            services.AddScoped<IAppMenu, AppMenuService>();
-
-
+            //services.AddScoped<IInventorySetupService, InventorySetupService>();
 
             #endregion
+
             services.Configure<JwtConfig>(options =>
-                 Configuration.GetSection(WebConstants.Sections.AuthJwtBearer).Bind(options));
+                        Configuration.GetSection(WebConstants.Sections.AuthJwtBearer).Bind(options));
+
+            //services.Configure<BookingConfig>(options =>
+            //           Configuration.GetSection(WebConstants.Sections.Booking).Bind(options));
 
             services.Configure<AppConfig>(options =>
                      Configuration.GetSection(WebConstants.Sections.App).Bind(options));
@@ -120,11 +156,13 @@ namespace SHB.WebApi
                      o.TokenLifespan = TimeSpan.FromHours(3));
 
             #region Auth
-            services.AddAuthentication(x => {
+            services.AddAuthentication(x =>
+            {
                 x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
-            .AddJwtBearer(x => {
+            .AddJwtBearer(x =>
+            {
                 var jwtConfig = new JwtConfig();
 
                 Configuration.Bind(WebConstants.Sections.AuthJwtBearer, jwtConfig);
@@ -143,7 +181,8 @@ namespace SHB.WebApi
                 };
                 x.Events = new JwtBearerEvents
                 {
-                    OnAuthenticationFailed = context => {
+                    OnAuthenticationFailed = context =>
+                    {
                         if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
                         {
                             context.Response.Headers.Add("Token-Expired", "true");
@@ -152,8 +191,17 @@ namespace SHB.WebApi
                     }
                 };
             });
+
+            //#endregion
+
+            //#region Auth
+            services.AddAuthorization(options =>
+            {
+                SetupPolicies(options);
+            });
             services.AddCors();
             services.AddDistributedMemoryCache();
+
             #endregion
 
             services.AddHttpContextAccessor();
@@ -166,68 +214,126 @@ namespace SHB.WebApi
             services.AddTransient<ISMSService, SMSService>();
             services.AddTransient<IWebClient, WebClient>();
             services.AddSingleton<IGuidGenerator>((s) => SequentialGuidGenerator.Instance);
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddTransient<IAppMenu, AppMenuService>();
+            services.AddTransient<IEmployeeService, EmployeeService>();
 
-            if (Environment.IsDevelopment())
-            {
-                services.AddSwaggerGen(options =>
+            //if (Environment.IsDevelopment())
+            //{ }
+            //services.AddSwaggerGen(options =>
+            //{
+            //    options.SwaggerDoc("v1", new OpenApiInfo { Title = "SHB Web API", Version = "v1" });
+            //    options.DocInclusionPredicate((docName, description) => true);
+
+            //    options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
+            //    {
+            //        In = ParameterLocation.Header,
+            //        Description = "Token Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+            //        Name = "Authorization",
+            //        Type = SecuritySchemeType.ApiKey
+            //    });
+            //    options.AddSecurityRequirement(new OpenApiSecurityRequirement {
+            //       {
+            //         new OpenApiSecurityScheme
+            //         {
+            //           Reference = new OpenApiReference
+            //           {
+            //             Type = ReferenceType.SecurityScheme,
+            //             Id = "Bearer"
+            //           }
+            //          },
+            //          new string[] { }
+            //        }
+            //      });
+
+            //});
+
+            //services.AddSwaggerGen(options => {
+            //    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Sharedbook", Version = "v1" });
+            //});
+
+
+
+            services.AddMvc()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
+                .AddNewtonsoftJson(o =>
                 {
-                    options.SwaggerDoc("v1", new OpenApiInfo { Title = "SHB Web API", Version = "v1" });
-                    options.DocInclusionPredicate((docName, description) => true);
+                    o.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                    o.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
 
-                    options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
-                    {
-                        In = ParameterLocation.Header,
-                        Description = "Token Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-                        Name = "Authorization",
-                        Type = SecuritySchemeType.ApiKey
-                    });
-                    options.AddSecurityRequirement(new OpenApiSecurityRequirement {
-                       {
-                         new OpenApiSecurityScheme
-                         {
-                           Reference = new OpenApiReference
-                           {
-                             Type = ReferenceType.SecurityScheme,
-                             Id = "Bearer"
-                           }
-                          },
-                          new string[] { }
-                        }
-                      });
+                });
 
-                                    });
-                                }
+        
 
 
-            //services.AddMvc()
-            //services.AddRazorPages()
-            services.AddControllers()
-            .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
-            .AddJsonOptions(options => {
-                options.JsonSerializerOptions.PropertyNamingPolicy = null;
-                options.JsonSerializerOptions.DictionaryKeyPolicy = null;
+            //services.AddHangfire(configuration => configuration
+            //    .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+            //    .UseSimpleAssemblyNameTypeSerializer()
+            //    .UseRecommendedSerializerSettings()
+            //    .UseSqlServerStorage(Configuration.GetConnectionString("Database"), new SqlServerStorageOptions
+            //    {
+            //        CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+            //        SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+            //        QueuePollInterval = TimeSpan.Zero,
+            //        UseRecommendedIsolationLevel = true,
+            //        DisableGlobalLocks = true
+            //    }));
 
-            });
+            //services.AddHangfireServer();
 
+            //services.AddScoped<IRecurringJob, RecurringJob>();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app /*, IHostingEnvironment env */)
+        private static void SetupPolicies(Microsoft.AspNetCore.Authorization.AuthorizationOptions options)
         {
+            options.AddPolicy("Manage Customer", policy =>
+                 policy.RequireClaim("Permission", PermissionClaimsProvider.ManageCustomer.Value));
+
+            options.AddPolicy("Manage Employee", policy =>
+                 policy.RequireClaim("Permission", PermissionClaimsProvider.ManageEmployee.Value));
+
+            options.AddPolicy("Manage Report", policy =>
+                policy.RequireClaim("Permission", PermissionClaimsProvider.ManageReport.Value));
+
+            options.AddPolicy("Manage State", policy =>
+                policy.RequireClaim("Permission", PermissionClaimsProvider.ManageState.Value));
+
+            options.AddPolicy("Manage Region", policy =>
+                policy.RequireClaim("Permission", PermissionClaimsProvider.ManageRegion.Value));
+
+            options.AddPolicy("Manage HireBooking", policy =>
+                policy.RequireClaim("Permission", PermissionClaimsProvider.ManageHireBooking.Value));
+
+            options.AddPolicy("Manage Vehicle", policy =>
+                policy.RequireClaim("Permission", PermissionClaimsProvider.ManageVehicle.Value));
+
+            options.AddPolicy("Manage Terminal", policy =>
+              policy.RequireClaim("Permission", PermissionClaimsProvider.ManageTerminal.Value));
+
+            options.AddPolicy("Manage Route", policy =>
+              policy.RequireClaim("Permission", PermissionClaimsProvider.ManageRoute.Value));
+
+            options.AddPolicy("Manage Trip", policy =>
+              policy.RequireClaim("Permission", PermissionClaimsProvider.ManageTrip.Value));
+        }
+
+        public void Configure(IApplicationBuilder app,
+            // IRecurringJobManager recurringJobManager,
+            IServiceProvider serviceProvider/*, ILoggerFactory loggerFactory*/)
+        {
+
             if (Environment.IsDevelopment())
             {
+
                 UserSeed.SeedDatabase(app);
                 app.UseDeveloperExceptionPage();
             }
             else
             {
-
-                //app.UseHsts();
                 app.UseExceptionHandler("/Error");
             }
 
-            app.UseCors(x => {
+            app.UseCors(x =>
+            {
                 x.WithOrigins(Configuration["App:CorsOrigins"]
                   .Split(",", StringSplitOptions.RemoveEmptyEntries)
                   .Select(o => o.RemovePostFix("/"))
@@ -237,23 +343,46 @@ namespace SHB.WebApi
             });
 
 
-            //app.UseMvc();
-            //app.UseStaticFiles();
-            app.UseAuthentication();
+
+            app.UseHttpsRedirection();
+            app.UseStaticFiles();
+
             app.UseRouting();
+
+            app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseCors();
-
+            //if (Environment.IsDevelopment())
+            //{ }
             app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+                {
+                    endpoints.MapControllers();
+                });
 
             app.UseSwagger();
-            app.UseSwaggerUI(options => {
-                options.SwaggerEndpoint(Configuration["App:ServerRootAddress"].EnsureEndsWith('/') + "swagger/v1/swagger.json", "LME.Web API V1");
+
+            app.UseSwaggerUI(options =>
+            {
+                options.SwaggerEndpoint("http://localhost:5001/" + "swagger/v1/swagger.json",
+                "sharedbook API");
             });
+            //app.useswaggerui(options =>
+            //{
+            //    options.swaggerendpoint(configuration["app:serverrootaddress"].ensureendswith('/') + "swagger/v1/swagger.json", "lme.web api v1");
+            //});
+
+
+            //app.UseHangfireDashboard();
+            //app.UseHangfireServer();
+            //recurringJobManager.AddOrUpdate(
+            //    "Run every minute",
+            //    //() => serviceProvider.GetService<IRecurringJob>().BackgroundJob(),
+            //    () => serviceProvider.GetService<IBookingService>().VerifyPaystack(),
+            //    "*/5 * * * *");
+            //app.UseFileServer();
+
+
+
         }
     }
 }

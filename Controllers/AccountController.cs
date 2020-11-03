@@ -1,20 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using IdentityModel;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using IdentityModel;
 using SHB.Business.Services;
 using SHB.Core.Domain.DataTransferObjects;
-using SHB.Core.Domain.Entities;
+using SHB.Core.Entities;
 using SHB.WebAPI.Utils;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace SHB.WebApi.Controllers
 {
-    [Authorize]
+    //[Authorize]
     public class AccountController : BaseController
     {
         private readonly IUserService _userSvc;
@@ -51,6 +48,7 @@ namespace SHB.WebApi.Controllers
             return userClaims;
         }
 
+        //[AllowAnonymous]
         [HttpGet]
         [Route("GetCurrentUserClaims")]
         public async Task<IServiceResponse<IEnumerable<Claim>>> GetCurrentUserClaims()

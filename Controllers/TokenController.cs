@@ -1,19 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using IdentityModel;
+using SHB.Business.Services;
+//using SHB.Core.DataTransferObjects;
+using SHB.Core.Entities;
+//using SHB.WebAPI.Infrastructure.Services;
+using SHB.WebAPI.Utils;
+//using SHB.WebAPI.ViewModels;
+using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Threading.Tasks;
-using IdentityModel;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using SHB.Business.Services;
-using SHB.Core.Domain.DataTransferObjects;
-using SHB.Core.Domain.Entities;
-using SHB.Core.Domain.Entities.Enums;
 using SHB.WebApi.Infrastructure.Services;
+using SHB.Core.Domain.DataTransferObjects;
 using SHB.WebApi.Utils;
+using SHB.Core.Entities.Enums;
 using SHB.WebApi.ViewModels;
-using SHB.WebAPI.Utils;
 
 namespace SHB.WebApi.Controllers
 {
