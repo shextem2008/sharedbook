@@ -71,7 +71,8 @@ namespace SHB.WebApi.Controllers
                 if (!ModelState.IsValid)
                 {
                     serviceResponse.ValidationErrors = ModelState.ToDictionary(
-                        m => {
+                        m =>
+                        {
                             var tokens = m.Key.Split('.');
                             return tokens.Length > 0 ? tokens[tokens.Length - 1] : tokens[0];
                         },

@@ -28,5 +28,4 @@
     <ProjectReference Include="..\SHB.Data\SHB.Data.csproj" />
   </ItemGroup>
 
-
 </Project>
